@@ -1,0 +1,42 @@
+-- Create the procedure
+CREATE OR REPLACE PROCEDURE FindDuplicates()
+RETURNS VARIANT
+LANGUAGE JAVASCRIPT
+AS
+$$
+  // Query to find duplicates
+  var query = `
+    SELECT column1, column2, COUNT(*)
+    FROM your_table
+    GROUP BY column1, column2
+    HAVING COUNT(*) > 1
+  `;
+ 
+  // Execute the query
+  var stmt = snowflake.createStatement({sqlText: query});
+  var result = stmt.execute();
+ 
+  // Process the result and store duplicates
+  var duplicates = [];
+  while (result.next()) {
+    var duplicate = {
+      column1: result.getColumnValue("column1"),
+      column2: result.getColumnValue("column2"),
+      count: result.getColumnValue("COUNT(*)")
+    };
+    duplicates.push(duplicate);
+  }
+ 
+  // Return the duplicates
+  return duplicates;
+$$;
+
+-- Call the procedure
+CALL FindDuplicates();
+
+
+In this example, the procedure named FindDuplicates executes a SQL query that finds duplicates in the your_table table based on the values in column1 and column2. The result is processed in JavaScript, and the duplicate rows (along with their count) are stored in an array. Finally, the array of duplicates is returned.
+
+Note: Replace your_table with the actual name of your table, and update the SELECT statement inside the procedure to include the columns you want to check for duplicates.
+
+Remember to grant the necessary privileges to the user executing the procedure, such as SELECT access on the table.

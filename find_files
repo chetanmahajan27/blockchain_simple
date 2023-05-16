@@ -1,0 +1,9 @@
+find /path/to/directory -type f -exec ls -lh {} + | sort -rhk 5
+
+Let's break down the command:
+
+find /path/to/directory: Specifies the directory where the search should start.
+-type f: Filters only regular files (excluding directories and other special file types).
+-exec ls -lh {} +: Executes the ls -lh command on each file found, which provides detailed information about the file, including its size.
+|: Pipes the output of the ls command to the sort command.
+sort -rhk 5: Sorts the output in reverse order (-r) based on the fifth field (-k 5), which corresponds to the file size. The -h flag enables human-readable sorting (e.g., 1K, 1M, 1G) instead of raw byte values.

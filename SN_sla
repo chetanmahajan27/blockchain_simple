@@ -1,0 +1,72 @@
+To connect with ServiceNow and generate an email if any incident ticket is about to breach SLA, you can use the following Python code as a starting point. Note that this code assumes you have the necessary credentials to access the ServiceNow API and the required libraries installed (requests and smtplib).
+
+```python
+import requests
+import smtplib
+from datetime import datetime, timedelta
+
+# ServiceNow API endpoint and credentials
+SNOW_INSTANCE = 'your_instance_name'
+SNOW_USERNAME = 'your_username'
+SNOW_PASSWORD = 'your_password'
+SLA_THRESHOLD_IN_MINUTES = 30
+
+# Email configuration
+SMTP_SERVER = 'smtp.example.com'
+SMTP_PORT = 587
+EMAIL_USERNAME = 'your_email_username'
+EMAIL_PASSWORD = 'your_email_password'
+EMAIL_FROM = 'your_email@example.com'
+EMAIL_TO = 'recipient@example.com'
+EMAIL_SUBJECT = 'Incident SLA Breach Alert'
+EMAIL_BODY_TEMPLATE = 'Incident ticket: {} is about to breach SLA.'
+
+# Connect to ServiceNow API and get incidents
+def get_incidents():
+    url = f'https://{SNOW_INSTANCE}.service-now.com/api/now/table/incident'
+    headers = {'Content-Type': 'application/json'}
+    response = requests.get(url, auth=(SNOW_USERNAME, SNOW_PASSWORD), headers=headers)
+    if response.status_code == 200:
+        return response.json()['result']
+    else:
+        print('Failed to fetch incidents.')
+        return []
+
+# Check if an incident is about to breach SLA
+def is_breaching_sla(incident):
+    sla_due_date_str = incident.get('sla_due')
+    if sla_due_date_str:
+        sla_due_date = datetime.strptime(sla_due_date_str, '%Y-%m-%d %H:%M:%S')
+        current_time = datetime.now()
+        time_difference = sla_due_date - current_time
+        return time_difference.total_seconds() / 60 <= SLA_THRESHOLD_IN_MINUTES
+    return False
+
+# Send email notification
+def send_email(subject, body):
+    server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    server.starttls()
+    server.login(EMAIL_USERNAME, EMAIL_PASSWORD)
+    message = f"Subject: {subject}\n\n{body}"
+    server.sendmail(EMAIL_FROM, EMAIL_TO, message)
+    server.quit()
+
+# Main function to check incidents and send email if needed
+def main():
+    incidents = get_incidents()
+    breaching_incidents = [incident for incident in incidents if is_breaching_sla(incident)]
+
+    if breaching_incidents:
+        for incident in breaching_incidents:
+            incident_number = incident.get('number')
+            email_body = EMAIL_BODY_TEMPLATE.format(incident_number)
+            send_email(EMAIL_SUBJECT, email_body)
+        print('Email sent for breaching incidents.')
+    else:
+        print('No incidents are breaching SLA.')
+
+if __name__ == '__main__':
+    main()
+```
+
+Please make sure to replace `'your_instance_name'`, `'your_username'`, `'your_password'`, `'your_email_username'`, `'your_email_password'`, `'smtp.example.com'`, `'your_email@example.com'`, and `'recipient@example.com'` with appropriate values. Also, ensure you have the necessary permissions to access the ServiceNow API and to send emails through the configured SMTP server.

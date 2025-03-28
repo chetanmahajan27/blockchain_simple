@@ -1,10 +1,10 @@
 import snowflake.connector
 import os
 
-def get_snowflake_ddl_with_comments_and_constraints(account, user, password, warehouse, database, schema, table_names, target_account, target_user, target_password, target_warehouse, target_database, target_schema):
+def get_snowflake_ddl_with_comments_and_constraints_from_file(account, user, password, warehouse, database, schema, table_file, target_account, target_user, target_password, target_warehouse, target_database, target_schema):
     """
     Retrieves DDL for Snowflake tables, including column comments and constraints,
-    and executes them on a target Snowflake database.
+    from a text file and executes them on a target Snowflake database.
 
     Args:
         account (str): Snowflake account name.
@@ -13,7 +13,7 @@ def get_snowflake_ddl_with_comments_and_constraints(account, user, password, war
         warehouse (str): Snowflake warehouse name.
         database (str): Snowflake database name.
         schema (str): Snowflake schema name.
-        table_names (list): List of table names.
+        table_file (str): Path to the text file containing table names (one per line).
         target_account (str): Target Snowflake account name.
         target_user (str): Target Snowflake user name.
         target_password (str): Target Snowflake password.
@@ -23,6 +23,10 @@ def get_snowflake_ddl_with_comments_and_constraints(account, user, password, war
     """
 
     try:
+        # Read table names from the text file
+        with open(table_file, "r") as f:
+            table_names = [line.strip() for line in f]
+
         # Connect to the source Snowflake database
         conn = snowflake.connector.connect(
             account=account,
@@ -111,10 +115,12 @@ def get_snowflake_ddl_with_comments_and_constraints(account, user, password, war
 
     except snowflake.connector.errors.Error as e:
         print(f"Snowflake connection error: {e}")
+    except FileNotFoundError:
+        print(f"Error: Table file '{table_file}' not found.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
-# Example usage (replace with your Snowflake credentials and table names):
+# Example usage (replace with your Snowflake credentials and table file):
 source_account = os.environ.get("SNOWFLAKE_ACCOUNT")
 source_user = os.environ.get("SNOWFLAKE_USER")
 source_password = os.environ.get("SNOWFLAKE_PASSWORD")
@@ -129,16 +135,16 @@ target_warehouse = "COMPUTE_WH"
 target_database = "TARGET_DB"
 target_schema = "PUBLIC"
 
-table_names = ["TABLE1", "TABLE2", "TABLE3"]  # Replace with your table names
+table_file = "table_names.txt"  # Replace with the path to your table name file
 
-get_snowflake_ddl_with_comments_and_constraints(
+get_snowflake_ddl_with_comments_and_constraints_from_file(
     source_account,
     source_user,
     source_password,
     source_warehouse,
     source_database,
     source_schema,
-    table_names,
+    table_file,
     target_account,
     target_user,
     target_password,

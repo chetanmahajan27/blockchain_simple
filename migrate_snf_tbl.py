@@ -1,6 +1,7 @@
 import snowflake.connector
 import os
 
+# this function retrieves the DDL for Snowflake tables, including column comments and constraints,
 def get_snowflake_ddl_with_comments_and_constraints_from_file(account, user, password, warehouse, database, schema, table_file, target_account, target_user, target_password, target_warehouse, target_database, target_schema):
     """
     Retrieves DDL for Snowflake tables, including column comments and constraints,

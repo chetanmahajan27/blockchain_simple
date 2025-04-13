@@ -1,0 +1,3 @@
+# This file contains the listings of all the transfers to remote servers
+# TRANSFER_ID    |REMOTE_USER     |REMOTE_SERVER               |REMOTE_PATH
+PLINX            |ubhedw          |ecghealthtech.com           |/home/ubhedw/

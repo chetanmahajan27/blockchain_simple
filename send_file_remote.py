@@ -56,7 +56,7 @@ def sftp_to_ecg(transfer_id, local_file, remote_file):
         print(f"Remote User: {remote_user}")
         print(f"Remote Host: {remote_host}")
         print(f"Remote Path: {remote_path}")
-        #write paramiko commands to send the file
+
         try:
             # Create an SSH client
             ssh = paramiko.SSHClient()

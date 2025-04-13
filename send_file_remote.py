@@ -3,28 +3,28 @@ import paramiko
 import sys
 
 def get_transfer_id(tf_id):
-    # write code to read from the MSTransferID.txt file and get the values in variables
-    # MSTransferID.txt is expected to be in the same directory as this script
-    # The file contains a single line with the transfer ID
-    # and line is pipe delimited, get all variables from the line
     transfer_id = None
     try:
         with open('MSTransferID.txt', 'r') as file:
-            line = file.readline().strip()
-            transfer_id = line.split('|')[0]  # Assuming the first value is the transfer ID
-            remote_user = line.split('|')[1]  # Assuming the second value is the remote user
-            remote_host = line.split('|')[2]
-            remote_path = line.split('|')[3]
-        except FileNotFoundError:
-            print("Error: MSTransferID.txt file not found.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None, None, None, None
-    if(transfer_id == tf_id):
-        print("Transfer ID found.")
-        return transfer_id, remote_user, remote_host, remote_path
-    else:
-        print("Transfer ID not found.")
+            # Read the file line by line
+            for line in file:
+                line = file.readline().strip()
+                transfer_id = line.split('|')[0]
+                remote_user = line.split('|')[1] 
+                remote_host = line.split('|')[2]
+                remote_path = line.split('|')[3]
+                
+                if transfer_id == tf_id:
+                    print("Transfer ID found.")
+                    return transfer_id, remote_user, remote_host, remote_path
+                elif transfer_id != tf_id:
+                    continue
+                else:
+                    print("Transfer ID not found.")
+                    return None, None, None, None
+
+    except FileNotFoundError:
+        print("Error: MSTransferID.txt file not found.")
         return None, None, None, None
 
 def sftp_to_ecg(transfer_id, local_file, remote_file):
@@ -45,7 +45,7 @@ def sftp_to_ecg(transfer_id, local_file, remote_file):
         return False  
         
     print(f"Transfer ID: {transfer_id}")
-    print(f"Transferring {local_file} to {remote_file}...")
+    print(f"Transferring {local_file} to {remote_host}:{remote_file}...")
 
     transfer_params = get_transfer_id(transfer_id)
     if transfer_params is None:
